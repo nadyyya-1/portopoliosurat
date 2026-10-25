@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories - Special Gift</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        burgundy: {
+                            deep: '#360810',
+                            dark: '#4A0E17',
+                            medium: '#7A1C2C',
+                            light: '#A3293D',
+                        },
+                        cream: '#FFFDD0',
+                        softcream: '#FAF4E8',
+                        gold: '#D4AF37',
+                        lightgold: '#F3E5AB',
+                    },
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        handwriting: ['Caveat', 'cursive'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #360810;
+            color: #FAF4E8;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(74, 14, 23, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-modal {
+            background: rgba(40, 6, 12, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+        }
+
+        /* Polaroid styling */
+        .polaroid-frame {
+            background: #FAF4E8;
+            color: #2D0B10;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4), 0 0 15px rgba(212, 175, 55, 0.15);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+
+        .polaroid-frame:hover {
+            transform: scale(1.03) rotate(0deg) !important;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6), 0 0 25px rgba(212, 175, 55, 0.4);
+            z-index: 20;
+        }
+
+        /* Floating Hearts Background Animation */
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            animation: floatUp 8s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Keypad Shake Animation */
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* Envelope Animation */
+        .envelope-wrapper {
+            perspective: 1000px;
+        }
+
+        .envelope {
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+        }
+
+        .envelope.open .flap {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        .flap {
+            transform-origin: top;
+            transition: transform 0.6s 0.2s ease, z-index 0.2s;
+            z-index: 5;
+        }
+
+        /* Gold Gradient Text */
+        .gold-text {
+            background: linear-gradient(135deg, #FFFDD0 0%, #D4AF37 50%, #AA7C11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #360810;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7A1C2C;
+            border-radius: 4px;
+            border: 1px solid #D4AF37;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between overflow-x-hidden selection:bg-burgundy-light selection:text-cream">
+
+    <!-- Ambient Audio Controls & Background Canvas Particles -->
+    <div id="hearts-container"></div>
+
+    <!-- Music Control Floating Button -->
+    <div class="fixed top-5 right-5 z-50 flex items-center gap-2">
+        <button id="music-btn" onclick="toggleAudio()" class="glass-card px-4 py-2.5 rounded-full flex items-center gap-2 border border-gold/40 text-gold hover:bg-burgundy-medium/50 transition-all shadow-lg active:scale-95 text-xs sm:text-sm">
+            <i id="music-icon" class="fa-solid fa-music"></i>
+            <span id="music-text" class="font-medium">Play Music</span>
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. ENTRY SCREEN (PIN LOCK 1 - ANNIVERSARY) -->
+    <!-- ========================================== -->
+    <section id="screen-pin1" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-gradient-to-br from-burgundy-deep via-burgundy-dark to-black transition-opacity duration-700">
+        <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center relative overflow-hidden border border-gold/30 shadow-2xl">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-gold/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="mb-6">
+                <div class="w-16 h-16 bg-burgundy-medium/40 border border-gold/50 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <i class="fa-solid fa-heart-lock text-gold text-2xl animate-pulse"></i>
+                </div>
+                <h1 class="font-cinzel text-3xl font-bold tracking-wider gold-text mb-1">Our Memories</h1>
+                <p class="text-xs text-cream/70 font-light">Masukkan Tanggal Jadian</p>
+            </div>
+
+            <!-- PIN Display -->
+            <div id="pin1-display-container" class="flex justify-center items-center gap-3 mb-8">
+                <div class="pin-dot w-4 h-4 rounded-full border border-gold/60 bg-transparent transition-all duration-300"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border border-gold/60 bg-transparent transition-all duration-300"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border border-gold/60 bg-transparent transition-all duration-300"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border border-gold/60 bg-transparent transition-all duration-300"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border border-gold/60 bg-transparent transition-all duration-300"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border border-gold/60 bg-transparent transition-all duration-300"></div>
+            </div>
+
+            <!-- Keypad -->
+            <div class="grid grid-cols-3 gap-3 max-w-xs mx-auto mb-4">
+                <button onclick="appendPin1('1')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">1</button>
+                <button onclick="appendPin1('2')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">2</button>
+                <button onclick="appendPin1('3')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">3</button>
+                <button onclick="appendPin1('4')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">4</button>
+                <button onclick="appendPin1('5')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">5</button>
+                <button onclick="appendPin1('6')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">6</button>
+                <button onclick="appendPin1('7')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">7</button>
+                <button onclick="appendPin1('8')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">8</button>
+                <button onclick="appendPin1('9')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">9</button>
+                <button onclick="clearPin1()" class="h-14 rounded-2xl bg-burgundy-medium/20 text-cream/70 hover:text-cream border border-gold/10 flex items-center justify-center active:scale-95 transition-all"><i class="fa-solid fa-rotate-left"></i></button>
+                <button onclick="appendPin1('0')" class="h-14 rounded-2xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-cinzel text-xl font-bold active:scale-95 transition-all">0</button>
+                <button onclick="deletePin1()" class="h-14 rounded-2xl bg-burgundy-medium/20 text-cream/70 hover:text-cream border border-gold/10 flex items-center justify-center active:scale-95 transition-all"><i class="fa-solid fa-backspace"></i></button>
+            </div>
+            
+            <p id="pin1-hint" class="text-xs text-rose-300 h-4 mt-2 font-light"></p>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. MINI-GAME GATE (TRIVIA)                -->
+    <!-- ========================================== -->
+    <section id="screen-trivia" class="fixed inset-0 z-30 hidden flex items-center justify-center p-4 bg-gradient-to-br from-burgundy-deep via-burgundy-dark to-black transition-opacity duration-700">
+        <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center relative border border-gold/30 shadow-2xl">
+            <div class="inline-block px-3 py-1 bg-gold/10 border border-gold/30 rounded-full text-xs font-semibold text-gold mb-4">
+                <i class="fa-solid fa-gamepad mr-1"></i> Quick Love Quiz
+            </div>
+            
+            <h2 class="font-cinzel text-2xl font-bold gold-text mb-2">Pertanyaan Spesial ✨</h2>
+            <p class="text-cream/90 text-sm mb-6 leading-relaxed">"Minuman favorit Nadya apa ayo tebak?" 🍹</p>
+
+            <div class="space-y-3 mb-6">
+                <button onclick="checkTrivia('Boba Tea')" class="w-full py-3.5 px-4 rounded-xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-medium text-sm transition-all transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-between">
+                    <span>A. Boba Tea</span>
+                    <i class="fa-solid fa-glass-water text-gold/60"></i>
+                </button>
+                <button onclick="checkTrivia('Lemon Tea')" class="w-full py-3.5 px-4 rounded-xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-medium text-sm transition-all transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-between">
+                    <span>B. Lemon Tea</span>
+                    <i class="fa-solid fa-lemon text-gold/60"></i>
+                </button>
+                <button onclick="checkTrivia('Matcha Latte')" class="w-full py-3.5 px-4 rounded-xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-medium text-sm transition-all transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-between">
+                    <span>C. Matcha Latte</span>
+                    <i class="fa-solid fa-mug-hot text-gold/60"></i>
+                </button>
+                <button onclick="checkTrivia('Kopi Susu')" class="w-full py-3.5 px-4 rounded-xl bg-burgundy-medium/30 hover:bg-burgundy-medium/60 border border-gold/20 text-cream font-medium text-sm transition-all transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-between">
+                    <span>D. Kopi Susu</span>
+                    <i class="fa-solid fa-mug-saucer text-gold/60"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Modal Popup for Playful Wrong Answer Alert -->
+    <div id="trivia-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="glass-modal max-w-xs w-full p-6 rounded-2xl text-center border border-gold/40 shadow-2xl transform transition-transform scale-90 opacity-0 duration-300" id="trivia-modal-card">
+            <div class="w-12 h-12 bg-rose-500/20 text-rose-300 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                😜
+            </div>
+            <h3 class="font-cinzel font-bold text-cream text-lg mb-2">Tetott!</h3>
+            <p id="trivia-modal-msg" class="text-sm text-cream/80 mb-5 leading-relaxed">Salah sayang 😜 Coba tebak lagi!</p>
+            <button onclick="closeTriviaModal()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-burgundy-medium to-burgundy-light text-cream font-semibold text-sm border border-gold/30 hover:brightness-110 active:scale-95 transition-all">
+                Coba Lagi
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. MAIN MEMORY GALLERY                    -->
+    <!-- ========================================== -->
+    <main id="screen-gallery" class="hidden opacity-0 transition-opacity duration-1000 min-h-screen pb-24 pt-12 px-4 sm:px-8 max-w-6xl mx-auto">
+        <!-- Header Banner -->
+        <header class="text-center mb-16 relative">
+            <div class="inline-block border-b-2 border-gold/40 pb-2 mb-3">
+                <span class="font-cinzel text-xs tracking-widest uppercase text-gold">Memories & Journey</span>
+            </div>
+            <h1 class="font-cinzel text-4xl sm:text-6xl font-extrabold gold-text mb-4">Our Album</h1>
+            <p class="font-handwriting text-2xl sm:text-3xl text-cream/90 max-w-xl mx-auto">
+                Kumpulan kenangan indah yang kita bersama... ✨
+            </p>
+        </header>
+
+        <!-- SECTION 1: Foto Pertama Kita -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-heart text-gold text-lg"></i>
+                <h2 class="font-cinzel text-2xl font-bold text-cream">Foto Pertama Kita</h2>
+            </div>
+            <div class="flex flex-col md:flex-row items-center gap-8 bg-burgundy-dark/30 p-6 sm:p-8 rounded-3xl border border-gold/20 backdrop-blur-sm">
+                <div class="w-full md:w-1/2 flex justify-center">
+                    <div class="polaroid-frame p-4 pb-6 rounded-sm max-w-xs sm:max-w-sm w-full -rotate-2">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-4 border border-black/10">
+                            <img id="img-sec1-1" src="era.jpeg" alt="Foto Pertama Kita" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec1-1')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 font-medium text-xs">
+                                <i class="fa-solid fa-camera text-xl"></i>
+                                Ganti Foto
+                            </button>
+                        </div>
+                        <p class="font-handwriting text-center text-xl text-neutral-800 font-bold">First Moment 💕</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 text-left">
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-gold">
+                        <p class="font-handwriting text-2xl sm:text-3xl text-cream leading-relaxed">
+                            "Ini foto pertama kali kita kan sayang inget ga?jamet kalii ya sayangg agak gelii liat nya haha 🙈"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Pertama Kali Photo Box -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-camera-retro text-gold text-lg"></i>
+                <h2 class="font-cinzel text-2xl font-bold text-cream">Pertama Kali Photo Box</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-burgundy-dark/30 p-6 sm:p-8 rounded-3xl border border-gold/20 backdrop-blur-sm">
+                <!-- 4 Photo Grid -->
+                <div class="lg:col-span-7 grid grid-cols-2 gap-4">
+                    <!-- Photo 1 -->
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-1">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec2-1" src="studio1.jpeg" alt="Photo Box 1" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec2-1')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Photo 2 -->
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-2">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec2-2" src="studio2.jpeg" alt="Photo Box 2" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec2-2')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Photo 3 -->
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-1">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec2-3" src="studio3.jpeg" alt="Photo Box 3" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec2-3')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Photo 4 -->
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-2">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec2-4" src="srudio4.jpeg" alt="Photo Box 4" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec2-4')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Text on side -->
+                <div class="lg:col-span-5">
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-gold">
+                        <p class="font-handwriting text-2xl sm:text-3xl text-cream leading-relaxed">
+                            "Ini pertama kali nya kita nyoba poto box ya sayangg, agak kaku gayanya ya namanya juga pertama kali ya haha"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Petualangan Tanduk Benua -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-mountain text-gold text-lg"></i>
+                <h2 class="font-cinzel text-2xl font-bold text-cream">Petualangan Tanduk Benua</h2>
+            </div>
+            <div class="bg-burgundy-dark/30 p-6 sm:p-8 rounded-3xl border border-gold/20 backdrop-blur-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                    <!-- Photo 1 -->
+                    <div class="polaroid-frame p-3 pb-5 rounded-sm -rotate-3">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec3-1" src="benua1.jpeg" alt="Tanduk Benua 1" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec3-1')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Photo 2 -->
+                    <div class="polaroid-frame p-3 pb-5 rounded-sm rotate-2">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec3-2" src="benua2.jpeg" alt="Tanduk Benua 2" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec3-2')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Photo 3 -->
+                    <div class="polaroid-frame p-3 pb-5 rounded-sm -rotate-1">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec3-3" src="benua3.jpeg" alt="Tanduk Benua 3" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec3-3')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-l-gold">
+                    <p class="font-handwriting text-2xl sm:text-3xl text-cream leading-relaxed text-center sm:text-left">
+                        "Foto kita di Tanduk Benua 🏔️ Jalan nya lumayan ekstrim ya baby, cape banget banyak bawaan untung nya tempat nya lumayan lah!"
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Pantai Remis -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-water text-gold text-lg"></i>
+                <h2 class="font-cinzel text-2xl font-bold text-cream">Pantai Remis</h2>
+            </div>
+            <div class="bg-burgundy-dark/30 p-6 sm:p-8 rounded-3xl border border-gold/20 backdrop-blur-sm">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                    <!-- 4 photos -->
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-2">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec4-1" src="pantai1.jpeg" alt="Pantai Remis 1" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec4-1')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-2">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec4-2" src="pantai2.jpeg" alt="Pantai Remis 2" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec4-2')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-1">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec4-3" src="pantai3.jpeg" alt="Pantai Remis 3" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec4-3')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-1">
+                        <div class="relative group aspect-square bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec4-4" src="pantai4.jpeg" alt="Pantai Remis 4" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec4-4')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-l-gold">
+                    <p class="font-handwriting text-2xl sm:text-3xl text-cream leading-relaxed text-center sm:text-left">
+                        "Foto waktu di Pantai Remis ya sayangg Indah banget pemandangan nya kayak kamu wkwk"
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Candid & Random Moments -->
+        <section class="mb-24">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fa-solid fa-[#FFB6C1] fa-icons text-gold text-lg"></i>
+                <h2 class="font-cinzel text-2xl font-bold text-cream">Candid & Random Moments</h2>
+            </div>
+            <div class="bg-burgundy-dark/30 p-6 sm:p-8 rounded-3xl border border-gold/20 backdrop-blur-sm">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-8">
+                    <!-- 6 cute random photos -->
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-2">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec5-1" src="poto1.jpeg" alt="Random 1" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec5-1')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-2">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec5-2" src="poto2.jpeg" alt="Random 2" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec5-2')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-1">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec5-3" src="poto3.jpeg" alt="Random 3" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec5-3')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-3">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec5-4" src="poto4.jpeg" alt="Random 4" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec5-4')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm -rotate-2">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec5-5" src="poto5.jpeg" alt="Random 5" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec5-5')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                    <div class="polaroid-frame p-3 pb-4 rounded-sm rotate-1">
+                        <div class="relative group aspect-[4/5] bg-neutral-200 overflow-hidden mb-2 border border-black/10">
+                            <img id="img-sec5-6" src="poto6.jpeg" alt="Random 6" class="w-full h-full object-cover">
+                            <button onclick="triggerFileInput('sec5-6')" class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-xs">
+                                <i class="fa-solid fa-camera text-lg"></i> Ganti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-l-gold">
+                    <p class="font-handwriting text-2xl sm:text-3xl text-cream leading-relaxed text-center sm:text-left">
+                        "Foto random yang nadya fotoin ya, lucu kan sayanggkuuu?"
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hidden Global File Input for uploading custom local images -->
+        <input type="file" id="global-file-input" accept="image/*" class="hidden">
+
+        <!-- ========================================== -->
+        <!-- 4. SECRET LOCKED LETTER (PIN LOCK 2)      -->
+        <!-- ========================================== -->
+        <section class="mt-20 text-center">
+            <div class="inline-block p-1 bg-gradient-to-r from-gold/40 via-burgundy-light to-gold/40 rounded-3xl mb-8">
+                <div class="glass-card px-8 py-3 rounded-[22px]">
+                    <span class="font-cinzel text-xs tracking-widest text-gold font-bold">Secret Unlocks</span>
+                </div>
+            </div>
+
+            <!-- Envelope Container -->
+            <div class="max-w-md mx-auto">
+                <div id="envelope-box" onclick="openLetterModal()" class="cursor-pointer group relative bg-burgundy-dark/60 hover:bg-burgundy-medium/40 border border-gold/40 rounded-3xl p-8 transition-all duration-300 shadow-2xl hover:shadow-gold/10">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-burgundy-medium/60 border-2 border-gold rounded-full flex items-center justify-center text-gold text-3xl shadow-lg group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <h3 class="font-cinzel text-xl font-bold gold-text mb-2">Surat Rahasia Untuk Sayangkuu</h3>
+                    <p class="text-xs text-cream/70 font-light mb-4">Terkuak rahasia manis dibalik pin ultah Nadya...</p>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/30 rounded-full text-gold text-xs font-semibold">
+                        <i class="fa-solid fa-lock text-xs"></i> Klik untuk Buka Surat
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal PIN 2 Lock & Letter Reveal -->
+    <div id="letter-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        
+        <!-- Step 1: PIN Lock Input for Letter (Nadya's Birthday: 130709) -->
+        <div id="letter-pin-card" class="glass-modal max-w-sm w-full p-8 rounded-3xl text-center border border-gold/40 shadow-2xl">
+            <div class="w-14 h-14 bg-burgundy-medium/40 border border-gold/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-key text-gold text-xl"></i>
+            </div>
+            <h3 class="font-cinzel font-bold text-cream text-xl mb-1">Surat Cinta</h3>
+            <p class="text-xs text-cream/70 mb-6 font-light">Masukkan Tanggal Lahir Nadya</p>
+
+            <!-- PIN Display -->
+            <div id="pin2-display-container" class="flex justify-center items-center gap-3 mb-6">
+                <div class="pin2-dot w-3.5 h-3.5 rounded-full border border-gold/60 bg-transparent transition-all"></div>
+                <div class="pin2-dot w-3.5 h-3.5 rounded-full border border-gold/60 bg-transparent transition-all"></div>
+                <div class="pin2-dot w-3.5 h-3.5 rounded-full border border-gold/60 bg-transparent transition-all"></div>
+                <div class="pin2-dot w-3.5 h-3.5 rounded-full border border-gold/60 bg-transparent transition-all"></div>
+                <div class="pin2-dot w-3.5 h-3.5 rounded-full border border-gold/60 bg-transparent transition-all"></div>
+                <div class="pin2-dot w-3.5 h-3.5 rounded-full border border-gold/60 bg-transparent transition-all"></div>
+            </div>
+
+            <!-- Keypad -->
+            <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto mb-3">
+                <button onclick="appendPin2('1')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">1</button>
+                <button onclick="appendPin2('2')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">2</button>
+                <button onclick="appendPin2('3')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">3</button>
+                <button onclick="appendPin2('4')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">4</button>
+                <button onclick="appendPin2('5')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">5</button>
+                <button onclick="appendPin2('6')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">6</button>
+                <button onclick="appendPin2('7')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">7</button>
+                <button onclick="appendPin2('8')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">8</button>
+                <button onclick="appendPin2('9')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">9</button>
+                <button onclick="clearPin2()" class="h-12 rounded-xl bg-burgundy-medium/20 text-cream/70 flex items-center justify-center"><i class="fa-solid fa-rotate-left"></i></button>
+                <button onclick="appendPin2('0')" class="h-12 rounded-xl bg-burgundy-medium/40 border border-gold/20 text-cream font-cinzel text-lg font-bold">0</button>
+                <button onclick="deletePin2()" class="h-12 rounded-xl bg-burgundy-medium/20 text-cream/70 flex items-center justify-center"><i class="fa-solid fa-backspace"></i></button>
+            </div>
+            
+            <p id="pin2-hint" class="text-xs text-rose-300 h-4 mb-3 font-light"></p>
+            
+            <button onclick="closeLetterModal()" class="text-xs text-cream/50 hover:text-cream underline">Batal</button>
+        </div>
+
+        <!-- Step 2: Unfolded Letter Content -->
+        <div id="letter-content-card" class="hidden max-w-lg w-full bg-softcream text-neutral-900 p-8 sm:p-10 rounded-3xl border-2 border-gold shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeLetterModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-burgundy-dark/10 text-burgundy-dark flex items-center justify-center hover:bg-burgundy-dark hover:text-cream transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="text-center mb-6 border-b border-burgundy-dark/20 pb-4">
+                <div class="w-12 h-12 bg-burgundy-dark text-gold rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-md">
+                    ❤️
+                </div>
+                <h2 class="font-cinzel text-2xl font-bold text-burgundy-dark">Surat Rahasia</h2>
+            </div>
+
+            <div class="space-y-4 font-sans text-neutral-800 text-sm sm:text-base leading-relaxed text-left">
+                <p class="font-bold text-burgundy-dark text-lg font-cinzel">Untuk Cintaku ❤️</p>
+
+                <p>
+                    maaf ya kalau kesan nya agak lebay heheh nadya cuman mau ingetin kalau sebentar lagi hubungan kita sudah mau 3 tahun... Semoga kita tetap saling sayang ya, saling jaga, saling menasehati satu sama lain, dan tetap konsisten rasa sayangnya serta bisa saling menurunkan ego ya sayangku.
+                </p>
+
+                <p>
+                    Nadya banyak-banyak mengucapkan terima kasih untuk kamu cintaku, udah menjadi yang terbaik selama ini dan seterusnya gitu ya. Nadya juga bangga banget sama kamu yang selama ini selalu semangat kerja beli apapun yang dimau dengan uang sendiri dan yang pastinya berdiri di kaki sendiri tanpa campur tangan orang tua.
+                </p>
+
+                <p>
+                    Semangat terus baby! Jangan lupa sharing cerita kalau ada apa-apa, Nadya selalu ada untuk kamu. Semangat terus sayang, panjang umur dan sehat selalu sayangku cintaku... Love you more! 💕
+                </p>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-burgundy-dark/20 text-right">
+                <p class="font-handwriting text-3xl font-bold text-burgundy-dark">Dari,Princes Nadya ✨</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Web Audio Ambient Sound Generator -->
+    <script>
+        // Floating Heart Particles Generator
+        function createHearts() {
+            const container = document.getElementById('hearts-container');
+            const heartIcons = ['❤️', '💖', '✨', '💕', '🌹'];
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle text-sm sm:text-base';
+                heart.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDelay = (Math.random() * 8) + 's';
+                heart.style.animationDuration = (6 + Math.random() * 6) + 's';
+                container.appendChild(heart);
+            }
+        }
+        createHearts();
+
+        // Audio Synth Engine (Romantic Ambient Chords)
+        let audioCtx = null;
+        let isPlaying = false;
+        let oscList = [];
+        let gainNode = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playAmbientSound() {
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Create gentle romantic pad chords (Cmaj7 / Am9 synth drone)
+            const freqs = [130.81, 164.81, 196.00, 246.94, 329.63]; // C, E, G, B, E
+            gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 3);
+
+            freqs.forEach(f => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+
+                // Slight LFO for dreamy warmth
+                const lfo = audioCtx.createOscillator();
+                lfo.frequency.value = 0.2;
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.value = 0.5;
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                lfo.start();
+
+                osc.connect(gainNode);
+                osc.start();
+                oscList.push(osc);
+            });
+
+            gainNode.connect(audioCtx.destination);
+            isPlaying = true;
+
+            document.getElementById('music-icon').className = "fa-solid fa-volume-high animate-pulse";
+            document.getElementById('music-text').innerText = "Music Playing";
+        }
+
+        function stopAmbientSound() {
+            if (gainNode && audioCtx) {
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1);
+                setTimeout(() => {
+                    oscList.forEach(o => o.stop());
+                    oscList = [];
+                }, 1000);
+            }
+            isPlaying = false;
+            document.getElementById('music-icon').className = "fa-solid fa-music";
+            document.getElementById('music-text').innerText = "Play Music";
+        }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                stopAmbientSound();
+            } else {
+                playAmbientSound();
+            }
+        }
+
+        // Sound effect helper (soft click / alert)
+        function playChime(success = true) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = success ? 'triangle' : 'sawtooth';
+                osc.frequency.setValueAtTime(success ? 523.25 : 150, audioCtx.currentTime);
+                if (success) {
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+                }
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // PIN LOCK 1 LOGIC (010124)
+        // ==========================================
+        let pin1 = "";
+        const TARGET_PIN1 = "010124";
+
+        function updatePin1Dots() {
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach((dot, index) => {
+                if (index < pin1.length) {
+                    dot.classList.remove('bg-transparent');
+                    dot.classList.add('bg-gold', 'shadow-[0_0_10px_#D4AF37]');
+                } else {
+                    dot.classList.remove('bg-gold', 'shadow-[0_0_10px_#D4AF37]');
+                    dot.classList.add('bg-transparent');
+                }
+            });
+        }
+
+        function appendPin1(num) {
+            if (pin1.length < 6) {
+                pin1 += num;
+                updatePin1Dots();
+                playChime(true);
+                if (pin1.length === 6) {
+                    verifyPin1();
+                }
+            }
+        }
+
+        function deletePin1() {
+            if (pin1.length > 0) {
+                pin1 = pin1.slice(0, -1);
+                updatePin1Dots();
+            }
+        }
+
+        function clearPin1() {
+            pin1 = "";
+            updatePin1Dots();
+        }
+
+        function verifyPin1() {
+            if (pin1 === TARGET_PIN1) {
+                document.getElementById('pin1-hint').innerText = "Access Granted 💕";
+                playChime(true);
+                setTimeout(() => {
+                    const screen1 = document.getElementById('screen-pin1');
+                    screen1.classList.add('opacity-0');
+                    setTimeout(() => {
+                        screen1.classList.add('hidden');
+                        document.getElementById('screen-trivia').classList.remove('hidden');
+                    }, 700);
+                }, 400);
+            } else {
+                playChime(false);
+                const container = document.getElementById('pin1-display-container');
+                container.classList.add('shake');
+                document.getElementById('pin1-hint').innerText = "PIN Salah sayang! Coba lagi 😘";
+                setTimeout(() => {
+                    container.classList.remove('shake');
+                    clearPin1();
+                }, 500);
+            }
+        }
+
+        // ==========================================
+        // MINI-GAME GATE (TRIVIA) LOGIC
+        // ==========================================
+        function checkTrivia(selectedOption) {
+            if (selectedOption === 'Lemon Tea') {
+                playChime(true);
+                // Unlock main gallery
+                const triviaScreen = document.getElementById('screen-trivia');
+                triviaScreen.classList.add('opacity-0');
+                setTimeout(() => {
+                    triviaScreen.classList.add('hidden');
+                    const gallery = document.getElementById('screen-gallery');
+                    gallery.classList.remove('hidden');
+                    setTimeout(() => {
+                        gallery.classList.remove('opacity-0');
+                    }, 50);
+                }, 700);
+            } else {
+                playChime(false);
+                // Show playful alert modal
+                const modal = document.getElementById('trivia-modal');
+                const modalCard = document.getElementById('trivia-modal-card');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalCard.classList.remove('scale-90', 'opacity-0');
+                    modalCard.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+        }
+
+        function closeTriviaModal() {
+            const modalCard = document.getElementById('trivia-modal-card');
+            modalCard.classList.remove('scale-100', 'opacity-100');
+            modalCard.classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('trivia-modal').classList.add('hidden');
+            }, 300);
+        }
+
+        // ==========================================
+        // PHOTO UPLOAD REPLACEMENT MECHANISM
+        // ==========================================
+        let currentTargetImgId = null;
+
+        function triggerFileInput(targetId) {
+            currentTargetImgId = 'img-' + targetId;
+            document.getElementById('global-file-input').click();
+        }
+
+        document.getElementById('global-file-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file && currentTargetImgId) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const imgElem = document.getElementById(currentTargetImgId);
+                    if (imgElem) {
+                        imgElem.src = event.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ==========================================
+        // PIN LOCK 2 LOGIC (130709 - NADYA'S BIRTHDAY)
+        // ==========================================
+        let pin2 = "";
+        const TARGET_PIN2 = "130709";
+
+        function openLetterModal() {
+            document.getElementById('letter-modal').classList.remove('hidden');
+            document.getElementById('letter-pin-card').classList.remove('hidden');
+            document.getElementById('letter-content-card').classList.add('hidden');
+            clearPin2();
+        }
+
+        function closeLetterModal() {
+            document.getElementById('letter-modal').classList.add('hidden');
+        }
+
+        function updatePin2Dots() {
+            const dots = document.querySelectorAll('.pin2-dot');
+            dots.forEach((dot, index) => {
+                if (index < pin2.length) {
+                    dot.classList.remove('bg-transparent');
+                    dot.classList.add('bg-gold', 'shadow-[0_0_8px_#D4AF37]');
+                } else {
+                    dot.classList.remove('bg-gold', 'shadow-[0_0_8px_#D4AF37]');
+                    dot.classList.add('bg-transparent');
+                }
+            });
+        }
+
+        function appendPin2(num) {
+            if (pin2.length < 6) {
+                pin2 += num;
+                updatePin2Dots();
+                playChime(true);
+                if (pin2.length === 6) {
+                    verifyPin2();
+                }
+            }
+        }
+
+        function deletePin2() {
+            if (pin2.length > 0) {
+                pin2 = pin2.slice(0, -1);
+                updatePin2Dots();
+            }
+        }
+
+        function clearPin2() {
+            pin2 = "";
+            updatePin2Dots();
+            document.getElementById('pin2-hint').innerText = "";
+        }
+
+        function verifyPin2() {
+            if (pin2 === TARGET_PIN2) {
+                playChime(true);
+                document.getElementById('pin2-hint').innerText = "Membuka Surat... ❤️";
+                setTimeout(() => {
+                    document.getElementById('letter-pin-card').classList.add('hidden');
+                    document.getElementById('letter-content-card').classList.remove('hidden');
+                }, 500);
+            } else {
+                playChime(false);
+                const container = document.getElementById('pin2-display-container');
+                container.classList.add('shake');
+                document.getElementById('pin2-hint').innerText = "PIN Ultah Nadya salah!";
+                setTimeout(() => {
+                    container.classList.remove('shake');
+                    clearPin2();
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html
